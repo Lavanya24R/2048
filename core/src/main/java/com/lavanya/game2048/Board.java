@@ -166,4 +166,29 @@ public class Board {
             e.printStackTrace();
         }
     }
+    public boolean isGameOver() {
+        // 1. If any empty tile exists → not game over
+        for (int r = 0; r < size; r++) {
+            for (int c = 0; c < size; c++) {
+                if (grid[r][c] == 0) return false;
+            }
+        }
+
+        // 2. Check horizontal merges
+        for (int r = 0; r < size; r++) {
+            for (int c = 0; c < size - 1; c++) {
+                if (grid[r][c] == grid[r][c + 1]) return false;
+            }
+        }
+
+        // 3. Check vertical merges
+        for (int c = 0; c < size; c++) {
+            for (int r = 0; r < size - 1; r++) {
+                if (grid[r][r] == grid[r + 1][c]) return false;
+            }
+        }
+
+        return true; // No empty and no merges possible
+    }
+
 }

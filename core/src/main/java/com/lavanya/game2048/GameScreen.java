@@ -20,6 +20,8 @@ public class GameScreen implements Screen, InputProcessor {
 
     private int gridSize = 4;
     private int startX, startY;
+    private boolean gameOver = false;
+
 
     public GameScreen(MainGame game) {
         this.game = game;
@@ -80,7 +82,7 @@ public class GameScreen implements Screen, InputProcessor {
                     float x = xOffset + tilePadding + c * (tileSize + tilePadding);
                     float y = yOffset + tilePadding + r * (tileSize + tilePadding);
                     font.setColor(Color.BLACK);
-                    font.getData().setScale(2);
+                    font.getData().setScale(3);
                     font.draw(batch, String.valueOf(val), x + tileSize / 2f - 15, y + tileSize / 2f + 10);
                 }
             }
@@ -89,6 +91,60 @@ public class GameScreen implements Screen, InputProcessor {
         font.draw(batch, "Score: " + board.getScore(), 50, Gdx.graphics.getHeight() - 50);
         font.draw(batch, "High Score: " + board.getHighScore(), 50, Gdx.graphics.getHeight() - 100);
         batch.end();
+
+        if (gameOver) {
+
+            // --- 1. Dark transparent full-screen overlay ---
+            shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+            shapeRenderer.setColor(new Color(0, 0, 0, 0.6f));   // semi–transparent black
+            shapeRenderer.rect(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+            shapeRenderer.end();
+
+            // --- 2. Center window/card ---
+            float boxWidth  = 600;
+            float boxHeight = 350;
+
+            float boxX = (Gdx.graphics.getWidth()  - boxWidth)  / 2f;
+            float boxY = (Gdx.graphics.getHeight() - boxHeight) / 2f;
+
+            // Card background
+            shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+            shapeRenderer.setColor(Color.valueOf("3c3a32"));   // 2048 tile dark theme
+            shapeRenderer.rect(boxX, boxY, boxWidth, boxHeight);
+            shapeRenderer.end();
+
+            batch.begin();
+
+            // --- 3. GAME OVER text ---
+            font.getData().setScale(5.5f);
+            font.setColor(Color.valueOf("fff7da"));  // warm white
+            font.draw(batch, "GAME OVER",
+                boxX + boxWidth / 2f - 200,
+                boxY + boxHeight - 70);
+
+            // --- 4. Final Score ---
+            font.getData().setScale(3);
+            font.setColor(Color.valueOf("ffe6a7"));
+            font.draw(batch, "Score: " + board.getScore(),
+                boxX + 80,
+                boxY + boxHeight / 2f + 20);
+
+            // --- 5. High Score ---
+            font.draw(batch, "Best:  " + board.getHighScore(),
+                boxX + 80,
+                boxY + boxHeight / 2f - 50);
+
+            // --- 6. Restart hint ---
+            font.getData().setScale(2.2f);
+            font.setColor(Color.valueOf("ffcc88"));
+            font.draw(batch, "Well Played!",
+                boxX + boxWidth / 2f - 200,
+                boxY + 40);
+
+            batch.end();
+        }
+
+
     }
 
     private Color getTileColor(int value) {
@@ -137,6 +193,10 @@ public class GameScreen implements Screen, InputProcessor {
             if (dy > 50) board.move("DOWN");
             else if (dy < -50) board.move("UP");
         }
+
+        if (board.isGameOver()) gameOver = true;
+        if (gameOver) return true;
+
         return true;
     }
 
@@ -145,6 +205,8 @@ public class GameScreen implements Screen, InputProcessor {
         if (keycode == Input.Keys.DOWN) board.move("UP");
         if (keycode == Input.Keys.LEFT) board.move("LEFT");
         if (keycode == Input.Keys.RIGHT) board.move("RIGHT");
+        if (board.isGameOver()) gameOver = true;
+        if (gameOver) return true;
         return true;
     }
 
